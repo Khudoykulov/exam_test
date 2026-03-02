@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - Test topshirish{% endblock %}
+{% block nav_exams %}active{% endblock %}
+{% block page_title %}Test topshirish{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timer-panel {
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        background: var(--white);
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        min-width: 140px;
+        text-align: center;
+    }
+
+    .timer-panel.warning {
+        border-color: var(--warning);
+        background: #fffbeb;
+    }
+
+    .timer-panel.danger {
+        border-color: var(--danger);
+        background: #fef2f2;
+        animation: timerPulse 1s infinite;
+    }
+
+    @keyframes timerPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+    }
+
+    .timer-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        color: var(--gray-500);
+        margin-bottom: 0.25rem;
+    }
+
+    .timer-display {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--primary);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .timer-panel.warning .timer-display { color: var(--warning); }
+    .timer-panel.danger .timer-display { color: var(--danger); }
+
+    .question-nav {
+        position: fixed;
+        top: 180px;
+        right: 24px;
+        background: var(--white);
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-md);
+        z-index: 999;
+        max-width: 160px;
+    }
+
+    .question-nav-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        color: var(--gray-500);
+        margin-bottom: 0.5rem;
+    }
+
+    .question-dots {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+    }
+
+    .q-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1.5px solid var(--gray-300);
+        background: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--gray-500);
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .q-dot:hover { border-color: var(--primary); color: var(--primary); }
+    .q-dot.answered { background: var(--primary); border-color: var(--primary); color: var(--white); }
+
+    .question-block {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        margin-bottom: 1.25rem;
+        border: 1px solid var(--gray-200);
+        transition: var(--transition);
+    }
+
+    .question-block:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .question-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .question-number {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: var(--gray-800);
+    }
+
+    .question-number span {
+        width: 28px;
+        height: 28px;
+        background: var(--primary);
+        color: var(--white);
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+    }
+
+    .question-text {
+        font-size: 1rem;
+        color: var(--gray-800);
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
+    }
+
+    .answer-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        margin: 0.5rem 0;
+        border: 1.5px solid var(--gray-200);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.9rem;
+        color: var(--gray-700);
+    }
+
+    .answer-option:hover {
+        border-color: var(--primary-light);
+        background: #eef2ff;
+    }
+
+    .answer-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .answer-option:has(input:checked) {
+        border-color: var(--primary);
+        background: #eef2ff;
+        font-weight: 600;
+        color: var(--primary-dark);
+    }
+
+    .exam-content {
+        max-width: 800px;
+    }
+
+    @media (max-width: 1024px) {
+        .question-nav { display: none; }
+        .timer-panel { top: 70px; right: 12px; padding: 0.6rem 0.8rem; }
+        .timer-display { font-size: 1.3rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="timer-panel" id="timer">
+    <div class="timer-label">Qolgan vaqt</div>
+    <div class="timer-display" id="time-display">{{ time_remaining }}:00</div>
+</div>
+
+<div class="question-nav" id="questionNav">
+    <div class="question-nav-title">Savollar</div>
+    <div class="question-dots" id="questionDots">
+        {% for question in questions %}
+        <a href="#q{{ forloop.counter }}" class="q-dot" id="dot-{{ question.id }}">{{ forloop.counter }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="exam-content">
+    <div style="margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+        <div>
+            <h2 style="margin:0;">{{ exam.title }}</h2>
+            <p style="color:var(--gray-500);font-size:0.85rem;">{{ exam.subject.name }} &middot; {{ questions.count }} ta savol</p>
+        </div>
+        <span class="badge badge-primary" style="font-size:0.8rem;padding:0.4rem 0.8rem;">
+            <i class="fas fa-file-alt"></i> {{ exam.get_exam_type_display }}
+        </span>
+    </div>
+
+    <form method="post" id="exam-form">
+        {% csrf_token %}
+
+        {% for question in questions %}
+        <div class="question-block" id="q{{ forloop.counter }}">
+            <div class="question-header">
+                <div class="question-number">
+                    <span>{{ forloop.counter }}</span>
+                    Savol
+                </div>
+                <span class="badge badge-primary">{{ question.marks }} ball</span>
+            </div>
+
+            <div class="question-text">{{ question.question_text }}</div>
+
+            {% if question.question_image %}
+            <img src="{{ question.question_image.url }}" alt="Savol rasmi" style="max-width:100%;border-radius:var(--radius);margin-bottom:1rem;">
+            {% endif %}
+
+            <div>
+                {% for answer in question.answers.all %}
+                <label class="answer-option" onclick="markAnswered('{{ question.id }}')">
+                    <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                    <span>{{ answer.answer_text }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="card" style="text-align:center;padding:2rem;">
+            <p style="color:var(--gray-500);font-size:0.85rem;margin-bottom:1rem;">Barcha savollarga javob berganingizga ishonch hosil qiling</p>
+            <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('Imtihonni yakunlashni xohlaysizmi?')">
+                <i class="fas fa-check-circle"></i> Imtihonni yakunlash
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let timeRemaining = {{ time_remaining }} * 60;
+    const timerEl = document.getElementById('timer');
+    const timeDisplay = document.getElementById('time-display');
+    const form = document.getElementById('exam-form');
+
+    function updateTimer() {
+        const m = Math.floor(timeRemaining / 60);
+        const s = timeRemaining % 60;
+        timeDisplay.textContent = m + ':' + s.toString().padStart(2, '0');
+
+        if (timeRemaining <= 300 && timeRemaining > 60) {
+            timerEl.classList.add('warning');
+            timerEl.classList.remove('danger');
+        }
+        if (timeRemaining <= 60) {
+            timerEl.classList.add('danger');
+            timerEl.classList.remove('warning');
+        }
+        if (timeRemaining <= 0) {
+            alert("Vaqt tugadi! Imtihon avtomatik yakunlanmoqda...");
+            form.submit();
+            return;
+        }
+        timeRemaining--;
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    function markAnswered(qId) {
+        const dot = document.getElementById('dot-' + qId);
+        if (dot) dot.classList.add('answered');
+    }
+
+    // Mark already answered
+    document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+        const name = r.name.replace('question_', '');
+        markAnswered(name);
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
+</script>
+{% endblock %}

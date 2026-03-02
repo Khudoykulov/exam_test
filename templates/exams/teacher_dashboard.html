@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}O'qituvchi paneli - TestPlatforma{% endblock %}
+{% block nav_teacher %}active{% endblock %}
+{% block page_title %}O'qituvchi paneli{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+    <h2>Boshqaruv paneli</h2>
+    <p style="color:var(--gray-500);font-size:0.9rem;">Sizga tayinlangan imtihonlarni boshqaring va guruhlarga ruxsat bering</p>
+</div>
+
+<!-- Tayinlangan imtihonlar -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-clipboard-list" style="color:var(--primary);margin-right:0.5rem;"></i>Tayinlangan imtihonlar</h3>
+    </div>
+
+    {% if assignments %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Imtihon</th>
+                    <th>Fan</th>
+                    <th>Tur</th>
+                    <th>Boshlanish</th>
+                    <th>Tugash</th>
+                    <th>Holat</th>
+                    <th>Tayinlagan</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assignments %}
+                <tr>
+                    <td style="font-weight:600;">{{ a.exam.title }}</td>
+                    <td>{{ a.exam.subject.name }}</td>
+                    <td>
+                        {% if a.exam.exam_type == 'midterm' %}
+                            <span class="badge badge-info">Oraliq</span>
+                        {% elif a.exam.exam_type == 'final' %}
+                            <span class="badge badge-primary">Yakuniy</span>
+                        {% else %}
+                            <span class="badge badge-warning">Mashq</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:0.85rem;">
+                        {% if a.admin_start_time %}
+                            {{ a.admin_start_time|date:"d.m.Y H:i" }}
+                        {% else %}
+                            <span style="color:var(--gray-400);">Darhol</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="font-size:0.85rem;{% if a.admin_deadline < now %}color:var(--danger);{% endif %}">
+                            {{ a.admin_deadline|date:"d.m.Y H:i" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if a.is_active_now %}
+                            <span class="badge badge-success">Faol</span>
+                        {% elif a.admin_deadline < now %}
+                            <span class="badge badge-danger">Muddati o'tgan</span>
+                        {% else %}
+                            <span class="badge badge-warning">Kutilmoqda</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:0.85rem;color:var(--gray-500);">{{ a.assigned_by.get_full_name }}</td>
+                    <td style="white-space:nowrap;">
+                        {% if a.is_active_now %}
+                        <a href="{% url 'exams:grant_permission' a.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-user-shield"></i> Ruxsat berish
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'exams:teacher_results' a.exam.id %}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-chart-bar"></i> Natijalar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+        <h3>Hali tayinlangan imtihonlar yo'q</h3>
+        <p>Admin sizga imtihon tayinlaganida bu yerda ko'rsatiladi.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Berilgan ruxsatlar -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-shield-alt" style="color:var(--success);margin-right:0.5rem;"></i>Berilgan ruxsatlar</h3>
+    </div>
+
+    {% if permissions %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Imtihon</th>
+                    <th>Guruh</th>
+                    <th>Deadline</th>
+                    <th>Holat</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in permissions %}
+                <tr>
+                    <td style="font-weight:600;">{{ p.exam.title }}</td>
+                    <td><span class="badge badge-info">{{ p.group.name }}</span></td>
+                    <td>
+                        <span style="{% if p.deadline < now %}color:var(--danger);{% endif %}">
+                            {{ p.deadline|date:"d.m.Y H:i" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if not p.is_active %}
+                            <span class="badge badge-danger">Bekor qilingan</span>
+                        {% elif p.deadline < now %}
+                            <span class="badge badge-warning">Muddati o'tgan</span>
+                        {% else %}
+                            <span class="badge badge-success">Faol</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.is_active and p.deadline >= now %}
+                        <a href="{% url 'exams:revoke_permission' p.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Haqiqatan ham bekor qilmoqchimisiz?');">
+                            <i class="fas fa-times"></i> Bekor qilish
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3>Hali ruxsat berilmagan</h3>
+        <p>Imtihon uchun guruhga ruxsat berganingizda bu yerda ko'rsatiladi.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

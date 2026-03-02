@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Natija - {{ result.exam.title }}{% endblock %}
+{% block nav_results %}active{% endblock %}
+{% block page_title %}Imtihon natijasi{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom:1.5rem;">
+    <a href="{% url 'results:result_list' %}" style="color:var(--gray-500);text-decoration:none;font-size:0.85rem;">
+        <i class="fas fa-arrow-left"></i> Natijalar
+    </a>
+    <span style="color:var(--gray-400);margin:0 0.5rem;">/</span>
+    <span style="color:var(--gray-600);font-size:0.85rem;font-weight:600;">{{ result.exam.title }}</span>
+</div>
+
+<!-- Status Banner -->
+<div class="card" style="border-left:4px solid {% if result.passed %}var(--success){% else %}var(--danger){% endif %};display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+    <div style="width:60px;height:60px;border-radius:50%;background:{% if result.passed %}rgba(16,185,129,0.1){% else %}rgba(239,68,68,0.1){% endif %};display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:{% if result.passed %}var(--success){% else %}var(--danger){% endif %};">
+        <i class="fas {% if result.passed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+    </div>
+    <div style="flex:1;">
+        <h2 style="margin:0 0 0.25rem;">{{ result.exam.title }}</h2>
+        <p style="margin:0;color:var(--gray-500);font-size:0.9rem;">
+            {{ result.exam.subject.name }} &bull; {{ result.exam.get_exam_type_display }} &bull; {{ result.created_at|date:"d.m.Y H:i" }}
+        </p>
+    </div>
+    <div>
+        {% if result.passed %}
+            <span class="badge badge-success" style="font-size:0.95rem;padding:0.5rem 1rem;">
+                <i class="fas fa-check"></i> O'tdingiz
+            </span>
+        {% else %}
+            <span class="badge badge-danger" style="font-size:0.95rem;padding:0.5rem 1rem;">
+                <i class="fas fa-times"></i> O'tmadingiz
+            </span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(99,102,241,0.1);color:var(--primary);">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-value" style="color:{% if result.passed %}var(--success){% else %}var(--danger){% endif %};">{{ result.score|floatformat:1 }}</div>
+        <div class="stat-label">Ball ({{ result.exam.total_marks }} dan)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(236,72,153,0.1);color:#ec4899;">
+            <i class="fas fa-percent"></i>
+        </div>
+        <div class="stat-value">{{ result.percentage|floatformat:1 }}%</div>
+        <div class="stat-label">Foiz</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.1);color:var(--warning);">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="stat-value" style="color:var(--primary);font-size:2rem;">{{ result.get_grade }}</div>
+        <div class="stat-label">Baho</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.1);color:var(--success);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">{{ result.exam.duration }}</div>
+        <div class="stat-label">Daqiqa</div>
+    </div>
+</div>
+
+<!-- Detailed Statistics -->
+<div class="card">
+    <h3 style="margin-bottom:1.5rem;"><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:0.5rem;"></i> Batafsil statistika</h3>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div style="text-align:center;padding:1.25rem;background:rgba(16,185,129,0.06);border-radius:var(--radius);border:1px solid rgba(16,185,129,0.15);">
+            <div style="font-size:2rem;font-weight:800;color:var(--success);">{{ result.correct_answers }}</div>
+            <div style="color:var(--gray-500);font-size:0.85rem;margin-top:0.3rem;">To'g'ri javoblar</div>
+        </div>
+        <div style="text-align:center;padding:1.25rem;background:rgba(239,68,68,0.06);border-radius:var(--radius);border:1px solid rgba(239,68,68,0.15);">
+            <div style="font-size:2rem;font-weight:800;color:var(--danger);">{{ result.wrong_answers }}</div>
+            <div style="color:var(--gray-500);font-size:0.85rem;margin-top:0.3rem;">Noto'g'ri javoblar</div>
+        </div>
+        <div style="text-align:center;padding:1.25rem;background:rgba(99,102,241,0.06);border-radius:var(--radius);border:1px solid rgba(99,102,241,0.15);">
+            <div style="font-size:2rem;font-weight:800;color:var(--primary);">{{ result.total_questions }}</div>
+            <div style="color:var(--gray-500);font-size:0.85rem;margin-top:0.3rem;">Jami savollar</div>
+        </div>
+        <div style="text-align:center;padding:1.25rem;background:rgba(245,158,11,0.06);border-radius:var(--radius);border:1px solid rgba(245,158,11,0.15);">
+            <div style="font-size:2rem;font-weight:800;color:var(--warning);">{{ result.exam.passing_marks }}</div>
+            <div style="color:var(--gray-500);font-size:0.85rem;margin-top:0.3rem;">O'tish balli</div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div style="padding:1.25rem;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <span style="font-weight:600;font-size:0.9rem;">Natija</span>
+            <span style="font-weight:700;color:{% if result.passed %}var(--success){% else %}var(--danger){% endif %};">{{ result.percentage|floatformat:1 }}%</span>
+        </div>
+        <div class="progress" style="height:12px;">
+            <div class="progress-bar" style="width:{{ result.percentage }}%;background:{% if result.passed %}var(--success){% else %}var(--danger){% endif %};"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:0.5rem;font-size:0.8rem;color:var(--gray-400);">
+            <span>0%</span>
+            <span style="color:var(--warning);">O'tish: {{ result.exam.passing_marks }} ball</span>
+            <span>100%</span>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Info -->
+<div class="card">
+    <h3 style="margin-bottom:1rem;"><i class="fas fa-info-circle" style="color:var(--primary);margin-right:0.5rem;"></i> Qo'shimcha ma'lumotlar</h3>
+    <div class="table-wrapper">
+        <table>
+            <tbody>
+                <tr>
+                    <td style="font-weight:600;color:var(--gray-500);width:200px;">Imtihon</td>
+                    <td>{{ result.exam.title }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--gray-500);">Fan</td>
+                    <td>{{ result.exam.subject.name }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--gray-500);">Tur</td>
+                    <td>{{ result.exam.get_exam_type_display }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--gray-500);">Topshirilgan sana</td>
+                    <td>{{ result.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600;color:var(--gray-500);">Davomiyligi</td>
+                    <td>{{ result.exam.duration }} daqiqa</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if result.feedback %}
+    <div style="margin-top:1.5rem;padding:1.25rem;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);">
+        <h4 style="color:var(--warning);margin-bottom:0.5rem;"><i class="fas fa-comment-alt"></i> Fikr-mulohaza</h4>
+        <p style="margin:0;color:var(--gray-600);">{{ result.feedback }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Actions -->
+<div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <a href="{% url 'results:result_list' %}" class="btn btn-primary">
+        <i class="fas fa-list"></i> Barcha natijalar
+    </a>
+    <a href="{% url 'exams:exam_list' %}" class="btn btn-secondary">
+        <i class="fas fa-file-alt"></i> Imtihonlar
+    </a>
+    <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">
+        <i class="fas fa-home"></i> Dashboard
+    </a>
+</div>
+{% endblock %}

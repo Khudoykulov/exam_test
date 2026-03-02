@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - TestPlatforma{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+    <h1 style="font-size:1.5rem;">Xush kelibsiz, {{ user.get_full_name }}!</h1>
+    <p style="color:var(--gray-500);font-size:0.9rem;">
+        {% if user.user_type == 'student' %}Bugungi statistikangiz va so'nggi faoliyatingiz
+        {% elif user.user_type == 'teacher' %}O'qituvchi boshqaruv paneli
+        {% else %}Administrator boshqaruv paneli{% endif %}
+    </p>
+</div>
+
+<div class="stats-grid">
+{% if user.user_type == 'student' %}
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff;color:var(--primary);">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="stat-value">{{ total_exams|default:0 }}</div>
+        <div class="stat-label">Topshirilgan testlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:var(--warning);">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-value">{{ avg_score|default:0|floatformat:1 }}%</div>
+        <div class="stat-label">O'rtacha ball</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:var(--success);">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-value">{{ results.count|default:0 }}</div>
+        <div class="stat-label">Yakunlangan testlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2;color:var(--danger);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{% if user.student_group %}{{ user.student_group.name }}{% else %}—{% endif %}</div>
+        <div class="stat-label">Guruh</div>
+    </div>
+
+{% elif user.user_type == 'teacher' %}
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff;color:var(--primary);">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="stat-value">{{ assignments_count|default:0 }}</div>
+        <div class="stat-label">Tayinlangan imtihonlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:var(--success);">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="stat-value">{{ permissions_count|default:0 }}</div>
+        <div class="stat-label">Faol ruxsatlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:var(--warning);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ total_groups|default:0 }}</div>
+        <div class="stat-label">Jami guruhlar</div>
+    </div>
+
+{% elif user.user_type == 'admin' %}
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff;color:var(--primary);">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="stat-value">{{ total_exams|default:0 }}</div>
+        <div class="stat-label">Faol imtihonlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:var(--warning);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ total_groups|default:0 }}</div>
+        <div class="stat-label">Guruhlar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:var(--success);">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="stat-value">{{ total_students|default:0 }}</div>
+        <div class="stat-label">Talabalar</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2;color:var(--danger);">
+            <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <div class="stat-value">{{ total_teachers|default:0 }}</div>
+        <div class="stat-label">O'qituvchilar</div>
+    </div>
+{% endif %}
+</div>
+
+<div class="grid-2" style="gap:1.5rem;">
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:0.5rem;"></i>Tezkor harakatlar</h3>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            {% if user.user_type == 'student' %}
+            <a href="{% url 'exams:exam_list' %}" class="btn btn-primary" style="justify-content:flex-start;">
+                <i class="fas fa-play-circle"></i> Yangi test boshlash
+            </a>
+            <a href="{% url 'results:result_list' %}" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-chart-bar"></i> Natijalarni ko'rish
+            </a>
+            <a href="{% url 'exams:my_exams' %}" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-history"></i> Test tarixini ko'rish
+            </a>
+            {% elif user.user_type == 'teacher' %}
+            <a href="{% url 'exams:teacher_dashboard' %}" class="btn btn-primary" style="justify-content:flex-start;">
+                <i class="fas fa-chalkboard-teacher"></i> Boshqaruv paneli
+            </a>
+            <a href="{% url 'exams:exam_list' %}" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-file-alt"></i> Imtihonlarni ko'rish
+            </a>
+            {% elif user.user_type == 'admin' %}
+            <a href="{% url 'exams:admin_assignments' %}" class="btn btn-primary" style="justify-content:flex-start;">
+                <i class="fas fa-user-shield"></i> Ruxsat berish
+            </a>
+            <a href="/admin/" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-cog"></i> Admin panel
+            </a>
+            <a href="{% url 'exams:teacher_dashboard' %}" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-chalkboard-teacher"></i> Boshqaruv paneli
+            </a>
+            <a href="{% url 'exams:exam_list' %}" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-file-alt"></i> Imtihonlar
+            </a>
+            {% endif %}
+            <a href="{% url 'users:profile' %}" class="btn btn-secondary" style="justify-content:flex-start;">
+                <i class="fas fa-user-edit"></i> Profilni ko'rish
+            </a>
+        </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-info-circle" style="color:var(--secondary);margin-right:0.5rem;"></i>Ma'lumot</h3>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);">
+                <i class="fas fa-user" style="color:var(--gray-400);width:20px;text-align:center;"></i>
+                <div>
+                    <div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;font-weight:600;">Foydalanuvchi</div>
+                    <div style="font-weight:600;">{{ user.get_full_name }}</div>
+                </div>
+            </div>
+            {% if user.student_group %}
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);">
+                <i class="fas fa-users" style="color:var(--gray-400);width:20px;text-align:center;"></i>
+                <div>
+                    <div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;font-weight:600;">Guruh</div>
+                    <div style="font-weight:600;">{{ user.student_group.name }}</div>
+                </div>
+            </div>
+            {% endif %}
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);">
+                <i class="fas fa-id-badge" style="color:var(--gray-400);width:20px;text-align:center;"></i>
+                <div>
+                    <div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;font-weight:600;">Roli</div>
+                    <div style="font-weight:600;">
+                        {% if user.user_type == 'student' %}Student
+                        {% elif user.user_type == 'teacher' %}O'qituvchi
+                        {% else %}Administrator{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.user_type == 'student' and results %}
+<div class="card" style="margin-top:0.5rem;">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-history" style="color:var(--primary);margin-right:0.5rem;"></i>So'nggi natijalar</h3>
+        <a href="{% url 'results:result_list' %}" class="btn btn-sm btn-secondary">Barchasini ko'rish</a>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Imtihon</th>
+                    <th>Fan</th>
+                    <th>Ball</th>
+                    <th>Holat</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results|slice:":5" %}
+                <tr>
+                    <td style="font-weight:600;">{{ result.exam.title }}</td>
+                    <td>{{ result.exam.subject.name }}</td>
+                    <td><strong>{{ result.score|floatformat:1 }}</strong> / {{ result.exam.total_marks }}</td>
+                    <td>
+                        {% if result.passed %}
+                            <span class="badge badge-success"><i class="fas fa-check"></i> O'tdi</span>
+                        {% else %}
+                            <span class="badge badge-danger"><i class="fas fa-times"></i> O'tmadi</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--gray-500);">{{ result.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

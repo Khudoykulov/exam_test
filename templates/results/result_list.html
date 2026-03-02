@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Natijalar - TestPlatforma{% endblock %}
+{% block nav_results %}active{% endblock %}
+{% block page_title %}Natijalar{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+    <h2>Mening natijalarim</h2>
+    <p style="color:var(--gray-500);font-size:0.9rem;">Barcha topshirgan imtihonlar natijalari</p>
+</div>
+
+{% if results %}
+    <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imtihon</th>
+                        <th>Fan</th>
+                        <th>Ball</th>
+                        <th>Foiz</th>
+                        <th>Baho</th>
+                        <th>Holat</th>
+                        <th>Sana</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td style="font-weight:600;">{{ result.exam.title }}</td>
+                        <td>{{ result.exam.subject.name }}</td>
+                        <td>
+                            <strong style="color:{% if result.passed %}var(--success){% else %}var(--danger){% endif %};">
+                                {{ result.score|floatformat:1 }}
+                            </strong>
+                            <span style="color:var(--gray-400);font-size:0.8rem;">/{{ result.exam.total_marks }}</span>
+                        </td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:0.5rem;">
+                                <div class="progress" style="width:60px;">
+                                    <div class="progress-bar" style="width:{{ result.percentage }}%;background:{% if result.passed %}var(--success){% else %}var(--danger){% endif %};"></div>
+                                </div>
+                                <span style="font-size:0.85rem;font-weight:600;">{{ result.percentage|floatformat:0 }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-size:1.1rem;font-weight:800;color:var(--primary);">{{ result.get_grade }}</span>
+                        </td>
+                        <td>
+                            {% if result.passed %}
+                                <span class="badge badge-success"><i class="fas fa-check"></i> O'tdi</span>
+                            {% else %}
+                                <span class="badge badge-danger"><i class="fas fa-times"></i> O'tmadi</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:var(--gray-500);font-size:0.85rem;">{{ result.created_at|date:"d.m.Y" }}</td>
+                        <td>
+                            <a href="{% url 'results:result_detail' result.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> Batafsil
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% else %}
+    <div class="card">
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-chart-pie"></i></div>
+            <h3>Hali natijalar yo'q</h3>
+            <p>Imtihonlarni topshirganingizdan keyin natijalar bu yerda ko'rsatiladi.</p>
+            <a href="{% url 'exams:exam_list' %}" class="btn btn-primary">
+                <i class="fas fa-file-alt"></i> Imtihonlar ro'yxati
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

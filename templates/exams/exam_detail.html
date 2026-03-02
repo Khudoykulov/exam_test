@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - TestPlatforma{% endblock %}
+{% block nav_exams %}active{% endblock %}
+{% block page_title %}Imtihon tafsilotlari{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--gray-400);">
+    <a href="{% url 'exams:exam_list' %}" style="color:var(--primary);text-decoration:none;">Imtihonlar</a>
+    <i class="fas fa-chevron-right" style="font-size:0.6rem;"></i>
+    <span>{{ exam.title }}</span>
+</div>
+
+<div class="card">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+        <h2 style="margin:0;">{{ exam.title }}</h2>
+        {% if exam.exam_type == 'midterm' %}
+            <span class="badge badge-info">Oraliq nazorat</span>
+        {% elif exam.exam_type == 'final' %}
+            <span class="badge badge-primary">Yakuniy nazorat</span>
+        {% else %}
+            <span class="badge badge-warning">Mashq</span>
+        {% endif %}
+    </div>
+    <p style="color:var(--gray-500);font-size:0.9rem;"><i class="fas fa-book" style="margin-right:0.3rem;"></i> {{ exam.subject.name }}</p>
+
+    {% if exam.description %}
+    <div style="background:var(--gray-50);padding:1rem;border-radius:var(--radius);margin-top:1rem;color:var(--gray-600);font-size:0.9rem;">
+        {{ exam.description }}
+    </div>
+    {% endif %}
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eef2ff;color:var(--primary);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">{{ exam.duration }}</div>
+        <div class="stat-label">daqiqa davomiyligi</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:var(--warning);">
+            <i class="fas fa-question-circle"></i>
+        </div>
+        <div class="stat-value">{{ questions_count }}</div>
+        <div class="stat-label">ta savol</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;color:var(--secondary);">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-value">{{ exam.total_marks }}</div>
+        <div class="stat-label">umumiy ball</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:var(--success);">
+            <i class="fas fa-check-double"></i>
+        </div>
+        <div class="stat-value">{{ exam.passing_marks }}</div>
+        <div class="stat-label">o'tish balli</div>
+    </div>
+</div>
+
+{% if permission %}
+<div class="card" style="border-left:4px solid var(--warning);">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-clock" style="color:var(--warning);margin-right:0.5rem;"></i>Muddat ma'lumoti</h3>
+    </div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div style="padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);flex:1;min-width:200px;">
+            <div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;font-weight:600;">Deadline</div>
+            <div style="font-weight:700;font-size:1.1rem;margin-top:0.25rem;">{{ permission.deadline|date:"d.m.Y H:i" }}</div>
+        </div>
+        <div style="padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);flex:1;min-width:200px;">
+            <div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;font-weight:600;">Holat</div>
+            <div style="margin-top:0.25rem;">
+                {% if permission.is_valid %}
+                    <span class="badge badge-success"><i class="fas fa-check"></i> Faol</span>
+                {% else %}
+                    <span class="badge badge-danger"><i class="fas fa-times"></i> Muddati o'tgan</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-exclamation-triangle" style="color:var(--warning);margin-right:0.5rem;"></i>E'tibor bering!</h3>
+    </div>
+    <div style="display:grid;gap:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);font-size:0.9rem;color:var(--gray-600);">
+            <i class="fas fa-ban" style="color:var(--danger);width:20px;text-align:center;"></i>
+            Imtihon boshlanganidan keyin orqaga qaytish imkoni bo'lmaydi
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);font-size:0.9rem;color:var(--gray-600);">
+            <i class="fas fa-pen" style="color:var(--primary);width:20px;text-align:center;"></i>
+            Barcha savollarga javob berishga harakat qiling
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);font-size:0.9rem;color:var(--gray-600);">
+            <i class="fas fa-hourglass-end" style="color:var(--warning);width:20px;text-align:center;"></i>
+            Vaqt tugashi bilan imtihon avtomatik yakunlanadi
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--gray-50);border-radius:var(--radius);font-size:0.9rem;color:var(--gray-600);">
+            <i class="fas fa-redo-alt" style="color:var(--gray-400);width:20px;text-align:center;"></i>
+            Imtihonni faqat bir marta topshirish mumkin
+        </div>
+    </div>
+</div>
+
+<div class="card" style="text-align:center;padding:2rem;">
+    {% if attempt %}
+        {% if attempt.status == 'completed' %}
+            <div style="margin-bottom:1.5rem;">
+                <div style="width:64px;height:64px;background:#d1fae5;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.75rem;">
+                    <i class="fas fa-check" style="font-size:1.5rem;color:var(--success);"></i>
+                </div>
+                <p style="font-weight:700;font-size:1.1rem;color:var(--success);">Siz bu imtihonni topshirgansiz</p>
+            </div>
+            <a href="{% url 'results:result_list' %}" class="btn btn-success btn-lg"><i class="fas fa-chart-bar"></i> Natijalarni ko'rish</a>
+        {% else %}
+            <a href="{% url 'exams:take_exam' exam.id %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-play-circle"></i> Imtihonni davom ettirish
+            </a>
+        {% endif %}
+    {% else %}
+        <div style="margin-bottom:1rem;">
+            <p style="color:var(--gray-500);font-size:0.9rem;">Tayyor bo'lganingizda boshlang</p>
+        </div>
+        <a href="{% url 'exams:start_exam' exam.id %}" class="btn btn-primary btn-lg" onclick="return confirm('Imtihonni boshlashni xohlaysizmi?')">
+            <i class="fas fa-rocket"></i> Imtihonni boshlash
+        </a>
+    {% endif %}
+    <a href="{% url 'exams:exam_list' %}" class="btn btn-secondary btn-lg" style="margin-left:0.5rem;">
+        <i class="fas fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+{% endblock %}

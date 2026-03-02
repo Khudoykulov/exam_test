@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Natijalar - {{ exam.title }}{% endblock %}
+{% block nav_teacher %}active{% endblock %}
+{% block page_title %}Imtihon natijalari{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom:1.5rem;">
+    <a href="{% url 'exams:teacher_dashboard' %}" style="color:var(--gray-500);text-decoration:none;font-size:0.85rem;">
+        <i class="fas fa-arrow-left"></i> O'qituvchi paneli
+    </a>
+    <span style="color:var(--gray-400);margin:0 0.5rem;">/</span>
+    <span style="color:var(--gray-600);font-size:0.85rem;font-weight:600;">{{ exam.title }}</span>
+</div>
+
+<!-- Imtihon info -->
+<div class="card" style="border-left:4px solid var(--primary);margin-bottom:1.5rem;">
+    <h3 style="margin:0 0 0.25rem;">{{ exam.title }}</h3>
+    <p style="margin:0;color:var(--gray-500);font-size:0.85rem;">
+        {{ exam.subject.name }} &bull; {{ exam.get_exam_type_display }} &bull; {{ exam.get_questions_count }} savol &bull; {{ exam.total_marks }} ball
+    </p>
+</div>
+
+<!-- Natijalar jadvali -->
+<div class="card" style="padding:0;overflow:hidden;">
+    <div class="card-header" style="padding:1rem 1.5rem;">
+        <h3 class="card-title"><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:0.5rem;"></i>Talabalar natijalari ({{ results.count }})</h3>
+    </div>
+
+    {% if results %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Talaba</th>
+                    <th>Guruh</th>
+                    <th>Ball</th>
+                    <th>Foiz</th>
+                    <th>To'g'ri</th>
+                    <th>Noto'g'ri</th>
+                    <th>Holat</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td style="color:var(--gray-400);">{{ forloop.counter }}</td>
+                    <td style="font-weight:600;">{{ r.student.get_full_name }}</td>
+                    <td>
+                        {% if r.student.student_group %}
+                            <span class="badge badge-info">{{ r.student.student_group.name }}</span>
+                        {% else %}
+                            <span style="color:var(--gray-400);">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong style="color:{% if r.passed %}var(--success){% else %}var(--danger){% endif %};">{{ r.score|floatformat:1 }}</strong>
+                        <span style="color:var(--gray-400);font-size:0.8rem;">/{{ exam.total_marks }}</span>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <div class="progress" style="width:50px;">
+                                <div class="progress-bar" style="width:{{ r.percentage }}%;background:{% if r.passed %}var(--success){% else %}var(--danger){% endif %};"></div>
+                            </div>
+                            <span style="font-size:0.85rem;">{{ r.percentage|floatformat:0 }}%</span>
+                        </div>
+                    </td>
+                    <td style="color:var(--success);font-weight:600;">{{ r.correct_answers }}</td>
+                    <td style="color:var(--danger);font-weight:600;">{{ r.wrong_answers }}</td>
+                    <td>
+                        {% if r.passed %}
+                            <span class="badge badge-success"><i class="fas fa-check"></i> O'tdi</span>
+                        {% else %}
+                            <span class="badge badge-danger"><i class="fas fa-times"></i> O'tmadi</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--gray-500);font-size:0.85rem;">{{ r.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:2rem;">
+        <div class="empty-icon"><i class="fas fa-chart-pie"></i></div>
+        <h3>Hali natijalar yo'q</h3>
+        <p>Talabalar imtihon topshirganida natijalar bu yerda ko'rsatiladi.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

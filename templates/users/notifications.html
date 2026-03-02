@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Bildirishnomalar - TestPlatforma{% endblock %}
+{% block nav_notifications %}active{% endblock %}
+{% block page_title %}Bildirishnomalar{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <div>
+        <h1 style="font-size:1.5rem;margin:0;">Bildirishnomalar</h1>
+        <p style="color:var(--gray-500);font-size:0.9rem;margin-top:0.25rem;">
+            {% if unread_count > 0 %}
+                <span class="badge badge-danger">{{ unread_count }}</span> ta o'qilmagan xabar
+            {% else %}
+                Barcha xabarlar o'qilgan
+            {% endif %}
+        </p>
+    </div>
+    {% if unread_count > 0 %}
+    <a href="{% url 'users:mark_all_read' %}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-check-double"></i> Barchasini o'qilgan deb belgilash
+    </a>
+    {% endif %}
+</div>
+
+{% if notifications %}
+<div style="display:flex;flex-direction:column;gap:0.75rem;">
+    {% for n in notifications %}
+    <div class="card" style="padding:1rem 1.25rem;border-left:4px solid {% if not n.is_read %}var(--primary){% elif n.notification_type == 'assignment' %}var(--success){% elif n.notification_type == 'permission' %}var(--warning){% else %}var(--gray-300){% endif %};{% if not n.is_read %}background:var(--primary-light);{% endif %}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;">
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                    {% if n.notification_type == 'assignment' %}
+                        <i class="fas fa-clipboard-check" style="color:var(--success);"></i>
+                    {% elif n.notification_type == 'permission' %}
+                        <i class="fas fa-shield-alt" style="color:var(--warning);"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle" style="color:var(--secondary);"></i>
+                    {% endif %}
+                    <h4 style="margin:0;font-size:0.95rem;">{{ n.title }}</h4>
+                    {% if not n.is_read %}
+                        <span class="badge badge-primary" style="font-size:0.65rem;">Yangi</span>
+                    {% endif %}
+                </div>
+                <div style="color:var(--gray-600);font-size:0.85rem;white-space:pre-line;line-height:1.6;">{{ n.message }}</div>
+                <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--gray-400);">
+                    <i class="fas fa-clock"></i> {{ n.created_at|date:"d.m.Y H:i" }}
+                </div>
+            </div>
+            {% if not n.is_read %}
+            <a href="{% url 'users:mark_notification_read' n.id %}" class="btn btn-sm btn-secondary" title="O'qilgan deb belgilash">
+                <i class="fas fa-check"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-bell-slash"></i></div>
+        <h3>Bildirishnomalar yo'q</h3>
+        <p>Yangi bildirishnomalar kelganida bu yerda ko'rsatiladi.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

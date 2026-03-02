@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil - TestPlatforma{% endblock %}
+{% block nav_profile %}active{% endblock %}
+{% block page_title %}Profil{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:300px 1fr;gap:2rem;align-items:start;">
+    <!-- Profile Card -->
+    <div class="card" style="text-align:center;">
+        {% if user.photo %}
+            <img src="{{ user.photo.url }}" alt="Profile" style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin:0 auto 1rem;display:block;border:4px solid var(--primary-light);">
+        {% else %}
+            <div style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-size:3rem;font-weight:800;margin:0 auto 1rem;">
+                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+            </div>
+        {% endif %}
+        <h3 style="margin:0;">{{ user.first_name }} {{ user.last_name }}</h3>
+        <p style="color:var(--gray-500);margin:0.25rem 0 1rem;">@{{ user.username }}</p>
+        {% if user.user_type == 'student' %}
+            <span class="badge badge-primary">Talaba</span>
+        {% elif user.user_type == 'teacher' %}
+            <span class="badge badge-warning">O'qituvchi</span>
+        {% else %}
+            <span class="badge badge-danger">Administrator</span>
+        {% endif %}
+
+        {% if user.user_type == 'student' %}
+            {% if user.student_group %}
+            <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--gray-200);">
+                <div style="font-size:0.8rem;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;">Guruh</div>
+                <div style="font-weight:700;font-size:1.1rem;color:var(--gray-700);margin-top:0.25rem;">{{ user.student_group.name }}</div>
+            </div>
+            {% endif %}
+
+            {% if user.course %}
+            <div style="margin-top:1rem;">
+                <div style="font-size:0.8rem;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;">Kurs</div>
+                <div style="font-weight:700;font-size:1.1rem;color:var(--gray-700);margin-top:0.25rem;">{{ user.course }}-kurs</div>
+            </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Info -->
+    <div>
+        <div class="card">
+            <h3 style="margin-bottom:1.25rem;"><i class="fas fa-user-circle" style="color:var(--primary);margin-right:0.5rem;"></i> Shaxsiy ma'lumotlar</h3>
+            <div class="table-wrapper">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:600;color:var(--gray-500);width:200px;"><i class="fas fa-user" style="width:20px;color:var(--gray-400);"></i> Ism</td>
+                            <td>{{ user.first_name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600;color:var(--gray-500);"><i class="fas fa-user" style="width:20px;color:var(--gray-400);"></i> Familiya</td>
+                            <td>{{ user.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600;color:var(--gray-500);"><i class="fas fa-at" style="width:20px;color:var(--gray-400);"></i> Username</td>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600;color:var(--gray-500);"><i class="fas fa-envelope" style="width:20px;color:var(--gray-400);"></i> Email</td>
+                            <td>{{ user.email|default:"Ko'rsatilmagan" }}</td>
+                        </tr>
+                        {% if user.phone %}
+                        <tr>
+                            <td style="font-weight:600;color:var(--gray-500);"><i class="fas fa-phone" style="width:20px;color:var(--gray-400);"></i> Telefon</td>
+                            <td>{{ user.phone }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td style="font-weight:600;color:var(--gray-500);"><i class="fas fa-calendar" style="width:20px;color:var(--gray-400);"></i> Ro'yxatdan o'tgan</td>
+                            <td>{{ user.created_at|date:"d.m.Y" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;margin-top:1rem;">
+            <a href="{% url 'users:dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="{% url 'exams:exam_list' %}" class="btn btn-secondary">
+                <i class="fas fa-file-alt"></i> Imtihonlar
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .content > div:first-child {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+{% endblock %}

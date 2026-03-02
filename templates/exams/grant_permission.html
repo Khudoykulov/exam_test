@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Ruxsat berish - {{ assignment.exam.title }}{% endblock %}
+{% block nav_teacher %}active{% endblock %}
+{% block page_title %}Ruxsat berish{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom:1.5rem;">
+    <a href="{% url 'exams:teacher_dashboard' %}" style="color:var(--gray-500);text-decoration:none;font-size:0.85rem;">
+        <i class="fas fa-arrow-left"></i> O'qituvchi paneli
+    </a>
+    <span style="color:var(--gray-400);margin:0 0.5rem;">/</span>
+    <span style="color:var(--gray-600);font-size:0.85rem;font-weight:600;">Ruxsat berish</span>
+</div>
+
+<!-- Imtihon ma'lumotlari -->
+<div class="card" style="border-left:4px solid var(--primary);margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div style="width:50px;height:50px;border-radius:12px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.3rem;">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div style="flex:1;">
+            <h3 style="margin:0;">{{ assignment.exam.title }}</h3>
+            <p style="margin:0.25rem 0 0;color:var(--gray-500);font-size:0.85rem;">
+                {{ assignment.exam.subject.name }} &bull; {{ assignment.exam.get_exam_type_display }}
+            </p>
+        </div>
+        <div style="text-align:right;">
+            <div style="font-size:0.75rem;color:var(--gray-400);text-transform:uppercase;">Admin deadline</div>
+            <div style="font-weight:700;color:var(--danger);">{{ assignment.admin_deadline|date:"d.m.Y H:i" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2" style="gap:1.5rem;">
+    <!-- Ruxsat berish formasi -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-plus-circle" style="color:var(--success);margin-right:0.5rem;"></i>Guruhga ruxsat berish</h3>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="group_id">Guruhni tanlang</label>
+                <select name="group_id" id="group_id" class="form-control" required>
+                    <option value="">-- Guruh tanlang --</option>
+                    <option value="all" style="font-weight:700;color:var(--primary);">🔓 Barcha guruhlar</option>
+                    {% for g in groups %}
+                        <option value="{{ g.id }}" {% if g.id in existing_group_ids %}disabled{% endif %}>
+                            {{ g.name }} ({{ g.students_count }} talaba)
+                            {% if g.id in existing_group_ids %} — allaqachon ruxsat berilgan{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deadline">Deadline</label>
+                <input type="datetime-local" name="deadline" id="deadline" class="form-control" required
+                       max="{{ assignment.admin_deadline|date:'Y-m-d' }}T{{ assignment.admin_deadline|date:'H:i' }}">
+                <small style="color:var(--gray-400);">Admin deadline: {{ assignment.admin_deadline|date:"d.m.Y H:i" }} dan oshmasligi kerak</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">
+                <i class="fas fa-check"></i> Ruxsat berish
+            </button>
+        </form>
+    </div>
+
+    <!-- Mavjud ruxsatlar -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-list" style="color:var(--primary);margin-right:0.5rem;"></i>Mavjud ruxsatlar</h3>
+        </div>
+
+        {% if existing_permissions %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            {% for p in existing_permissions %}
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--gray-50);border-radius:var(--radius);border-left:3px solid {% if p.is_active %}var(--success){% else %}var(--danger){% endif %};">
+                <div>
+                    <span style="font-weight:600;">{{ p.group.name }}</span>
+                    <span style="color:var(--gray-500);font-size:0.8rem;margin-left:0.5rem;">
+                        {{ p.deadline|date:"d.m.Y H:i" }}
+                    </span>
+                </div>
+                <div>
+                    {% if p.is_active %}
+                        <span class="badge badge-success">Faol</span>
+                    {% else %}
+                        <span class="badge badge-danger">Bekor</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--gray-500);text-align:center;padding:1rem;">Hali ruxsat berilmagan</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

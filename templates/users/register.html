@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Ro'yxatdan o'tish - TestPlatforma{% endblock %}
+
+{% block content_auth %}
+<div style="width:100%;max-width:520px;">
+    <div style="text-align:center;margin-bottom:2rem;">
+        <div style="width:64px;height:64px;background:var(--primary);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;">
+            <i class="fas fa-user-plus" style="font-size:1.6rem;color:white;"></i>
+        </div>
+        <h1 style="font-size:1.6rem;margin-bottom:0.25rem;">Ro'yxatdan o'tish</h1>
+        <p style="color:var(--gray-500);font-size:0.9rem;">Yangi hisob yaratish</p>
+    </div>
+
+    <div class="card" style="padding:2rem;">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="first_name">Ism</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Ismingiz" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Familiya</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Familiyangiz" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Foydalanuvchi nomi</label>
+                <input type="text" name="username" id="username" class="form-control" placeholder="username tanlang" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="email@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="student_group">Guruh</label>
+                <select name="student_group" id="student_group" class="form-control">
+                    <option value="">— Guruhni tanlang —</option>
+                    {% for g in groups %}
+                    <option value="{{ g.id }}">{{ g.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="password">Parol</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Parol kiriting" required>
+                </div>
+                <div class="form-group">
+                    <label for="password2">Parolni tasdiqlang</label>
+                    <input type="password" name="password2" id="password2" class="form-control" placeholder="Parolni takrorlang" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:0.5rem;">
+                <i class="fas fa-user-plus"></i> Ro'yxatdan o'tish
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--gray-200);">
+            <p style="color:var(--gray-500);font-size:0.9rem;">
+                Hisobingiz bormi?
+                <a href="{% url 'users:login' %}" style="color:var(--primary);font-weight:600;text-decoration:none;">Kirish</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
