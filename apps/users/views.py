@@ -49,14 +49,19 @@ def user_register(request):
         password2 = request.POST.get('password2', '')
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
+        group_id = request.POST.get('student_group', '').strip()
         
         if not username:
             messages.error(request, "Username kiritilishi shart!")
-            return render(request, 'users/register.html')
+            return render(request, 'users/register.html', {'groups': StudentGroup.objects.all()})
+        
+        if not group_id:
+            messages.error(request, "Guruh tanlanishi shart!")
+            return render(request, 'users/register.html', {'groups': StudentGroup.objects.all()})
         
         if password != password2:
             messages.error(request, "Parollar mos emas!")
-            return render(request, 'users/register.html')
+            return render(request, 'users/register.html', {'groups': StudentGroup.objects.all()})
         
         # Parol validatsiyasi
         try:
@@ -64,11 +69,19 @@ def user_register(request):
         except ValidationError as e:
             for error in e.messages:
                 messages.error(request, error)
-            return render(request, 'users/register.html')
+            return render(request, 'users/register.html', {'groups': StudentGroup.objects.all()})
         
         if CustomUser.objects.filter(username=username).exists():
             messages.error(request, "Bu username band!")
-            return render(request, 'users/register.html')
+            return render(request, 'users/register.html', {'groups': StudentGroup.objects.all()})
+        
+        # Guruhni topish
+        student_group = None
+        try:
+            student_group = StudentGroup.objects.get(id=group_id)
+        except StudentGroup.DoesNotExist:
+            messages.error(request, "Tanlangan guruh topilmadi!")
+            return render(request, 'users/register.html', {'groups': StudentGroup.objects.all()})
 
         user = CustomUser.objects.create_user(
             username=username,
@@ -76,13 +89,15 @@ def user_register(request):
             password=password,
             first_name=first_name,
             last_name=last_name,
+            student_group=student_group,
             user_type='student'
         )
         
-        messages.success(request, "Ro'yxatdan o'tdingiz! Admin sizni guruhga biriktirgandan so'ng testlarni ko'rishingiz mumkin.")
+        messages.success(request, f"Ro'yxatdan o'tdingiz! ({student_group.name} guruhi) Endi login qilishingiz mumkin.")
         return redirect('users:login')
     
-    return render(request, 'users/register.html')
+    groups = StudentGroup.objects.all().order_by('name')
+    return render(request, 'users/register.html', {'groups': groups})
 
 
 @login_required

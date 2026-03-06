@@ -37,6 +37,16 @@
                 <input type="email" name="email" id="email" class="form-control" placeholder="email@example.com" required>
             </div>
 
+            <div class="form-group">
+                <label for="student_group">Guruh <span style="color:var(--danger);">*</span></label>
+                <select name="student_group" id="student_group" class="form-control" required>
+                    <option value="">— Guruhni tanlang —</option>
+                    {% for g in groups %}
+                    <option value="{{ g.id }}">{{ g.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="grid-2">
                 <div class="form-group">
                     <label for="password">Parol</label>
